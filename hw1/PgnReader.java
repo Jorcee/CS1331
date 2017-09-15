@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.Arrays;
 public class PgnReader {
     private static char[][] board = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
 				     {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
@@ -49,15 +49,44 @@ public class PgnReader {
 	int[][] coordinatesOfPieces;
 	int[] coordinatesOfPiece;
 	int[] coordsOfMove = new int[2];
-	char piece = 'v';
+	char piece = ' ';
+	String finalInFEN = "";
+	int spaceCounter = 0;
 	for(int i = 0; i < moves.length; i++) {
 	    piece = decidePiece(moves[i], i);
-	    coordinatesOfMove = moveCoords(move[i]);
+	    coordsOfMove = moveCoords(moves[i]);
 	    coordinatesOfPieces = findPieces(piece);
-	    coordinatesOfPiece = choosePiece(piece, coordinatesOfPieces, coordinatesOfMove, moves[i], i);
+	    coordinatesOfPiece = choosePiece(piece, coordinatesOfPieces, coordsOfMove, moves[i], i);
+	    //Debug Code
+	    /*System.out.println(moves[i]);
+	    System.out.println(coordsOfMove[0] + ", " + coordsOfMove[1] + " Move");
+	    for (int j[] : coordinatesOfPieces) {
+		System.out.println(j[0] + ", " + j[1]);
+	    }
+	    System.out.println(piece);
+	    System.out.println(coordinatesOfPiece[0] + " " + coordinatesOfPiece[1]);*/
+	    board[coordsOfMove[0]][coordsOfMove[1]] = piece;
+	    board[coordinatesOfPiece[0]][coordinatesOfPiece[1]] = ' ';
 	    
+
 	}
-	return piece + "Fuck";
+	for ( char[] i : board) {
+	    for(char j : i) {
+		if (j == ' ') {
+		    spaceCounter++;
+		} else {
+		    if ( spaceCounter > 0) {
+			finalInFEN += spaceCounter + Character.toString(j);
+			spaceCounter = 0;
+		    } else {
+			finalInFEN += Character.toString(j);
+		    }
+		}
+	    }
+	    finalInFEN += (spaceCounter > 0) ? spaceCounter + "/" : "/";
+	    spaceCounter = 0;
+	}
+	return finalInFEN;
     }
     /**
      *Find the coordinates of the one piece that
@@ -70,35 +99,49 @@ public class PgnReader {
      *and moveNum is the turn number
      */
     public static int[] choosePiece(char piece, int[][] coords, int[] moveCoords, String move, int moveNum) {
-	int[] coordsOfAble = new int[2]
+	int[] coordsOfAble = {6,4};
 	if (piece == 'P' || piece == 'p') {
 	    for(int[] i : coords) {
 		coordsOfAble = (canPawnMove(i[0], i[1], moveCoords[0], moveCoords[1],
-					    moveNum, move.contains('x'))) ? i : null;
+					    moveNum, move.contains("x"))) ? i : coordsOfAble;
 	    }
 	} else if (piece == 'N' || piece == 'n') {
 	    for(int[] i : coords) {
-		coordsOfAble = (canKnightMove(i[0], i[1], moveCoords[0], moveCoords[1])) ? : i : null;
+		coordsOfAble = (canKnightMove(i[0], i[1], moveCoords[0], moveCoords[1])) ? i : coordsOfAble;
 	    }
 	} else if (piece == 'B' || piece == 'b') {
 	    for(int[] i : coords) {
-		coordsOfAble = (canBishopMove(i[0], i[1], moveCoords[0], moveCoords[1])) ? : i : null;
+		coordsOfAble = (canBishopMove(i[0], i[1], moveCoords[0], moveCoords[1])) ? i : coordsOfAble;
+	    }
+	} else if (piece == 'R' || piece == 'r') {
+	    for(int[] i : coords) {
+		coordsOfAble = (canRookMove(i[0], i[1], moveCoords[0], moveCoords[1])) ? i : coordsOfAble;
+	    }
+	} else if (piece == 'Q' || piece == 'q') {
+	    for(int[] i : coords) {
+		coordsOfAble = (canQueenMove(i[0], i[1], moveCoords[0], moveCoords[1])) ? i :  coordsOfAble;
+	    }
+	} else if (piece == 'K' || piece == 'k') {
+	    for(int[] i : coords) {
+		coordsOfAble = (canKingMove(i[0], i[1], moveCoords[0], moveCoords[1])) ? i :  coordsOfAble;
 	    }
 	}
+	return coordsOfAble;
     }
-
+  
     /**
      *Parse the coordinates of the move to be made
      *where move is the string of the move
      */
     public static int[] moveCoords(String move) {
-	int[] coords = {0, 0}
+	int[] coords = {0, 0};
 	char[] charsOfMove = move.toCharArray();
 	for(char i : charsOfMove) {
 	    if (i > 96 && i < 105) {
 	        coords[1] = i - 97;
 	    } else if (i > 48 && i < 57) {
 		coords[0] = i - 49;
+		coords[0] = 7 - coords[0];
 	    }
 	}
 	return coords;
@@ -108,12 +151,12 @@ public class PgnReader {
      *where piece is the type of piece to find
      *return the coordinates of the pieces
      */
-    public static int[][] findPiecess(char piece) {
+    public static int[][] findPieces(char piece) {
 	int[][] coordinates = new int[8][2];
 	int coordCounter = 0;
 	for (int i = 0;i < 8;i++) {
 	    for (int j = 0; j < 8;j++) {
-		if (board[i][k] == piece) {
+		if (board[i][j] == piece) {
 		    coordinates[coordCounter][0] = i;
 		    coordinates[coordCounter][1] = j;
 		    coordCounter++;
@@ -122,8 +165,8 @@ public class PgnReader {
 	}
 	int[][] tempCoordinates = coordinates;
 	coordinates = new int[coordCounter][2];
-	for (int i = 0; i <= coordCounter; i++) {
-	    coordinates[i] = temCoordinates[i];
+	for (int i = 0; i < coordCounter; i++) {
+	    coordinates[i] = tempCoordinates[i];
 	}
 	return coordinates;
 	
@@ -134,9 +177,9 @@ public class PgnReader {
      * and turn is the turn number(index in moves[])
      */
     public static char decidePiece(String move, int turn) {
-	if (move.equals(" ")) {
+	/*if (move.equals(" ")) {
 	    return ' ';
-	}
+	    }*/
 	char pulledPiece = move.charAt(0);
 	char piece;
 	if (pulledPiece == 'N') {
@@ -236,8 +279,8 @@ public class PgnReader {
             canMove = ((r - mr) * multiplier == 1) ? true : canMove;
             canMove = (Math.abs(c - mc) == 1) ? canMove : false;
         } else {
-            canMove = ((r - mr) * multiplier < 3) ? true : canMove;
-            canMove = (mc == c) ? canMove : false;
+            canMove = ((r - mr) * multiplier == 2) ? true : canMove;
+	    canMove = ((r - mr) * multiplier == 1) ? true : canMove;
         }
         return canMove;
     }

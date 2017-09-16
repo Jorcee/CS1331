@@ -65,11 +65,31 @@ public class PgnReader {
 	    }
 	    System.out.println(piece);
 	    System.out.println(coordinatesOfPiece[0] + " " + coordinatesOfPiece[1]);*/
+	    //Debug End
 	    board[coordsOfMove[0]][coordsOfMove[1]] = piece;
 	    board[coordinatesOfPiece[0]][coordinatesOfPiece[1]] = ' ';
-	    
-
+	    finalInFEN = "";
+	    //Debug Code pt2
+	    /*
+	    for (char[] k : board) {
+		for(char j : k) {
+		    if (j == ' ') {
+		    spaceCounter++;
+		    } else {
+			if ( spaceCounter > 0) {
+			    finalInFEN += spaceCounter + Character.toString(j);
+			    spaceCounter = 0;
+			} else {
+			    finalInFEN += Character.toString(j);
+			}
+		    }
+		}
+		finalInFEN += (spaceCounter > 0) ? spaceCounter + "/" : "/";
+		spaceCounter = 0;
+	    }
+	    System.out.println(finalInFEN);*/
 	}
+	finalInFEN = "";
 	for ( char[] i : board) {
 	    for(char j : i) {
 		if (j == ' ') {
@@ -85,7 +105,8 @@ public class PgnReader {
 	    }
 	    finalInFEN += (spaceCounter > 0) ? spaceCounter + "/" : "/";
 	    spaceCounter = 0;
-	}
+	    }
+	finalInFEN = finalInFEN.substring(0, (finalInFEN.length() - 1));
 	return finalInFEN;
     }
     /**
@@ -168,8 +189,7 @@ public class PgnReader {
 	for (int i = 0; i < coordCounter; i++) {
 	    coordinates[i] = tempCoordinates[i];
 	}
-	return coordinates;
-	
+	return coordinates;	
     }
     /**
      *Decide which piece is being moved
@@ -245,6 +265,7 @@ public class PgnReader {
 	//numOfMoves reads the number of the last move in the file;
 	//How many move sets there are
 	String[] moves = new String[numOfMoves * 2];
+	String[] tempMoves;
 	startIndex = 0;
 	endIndex = 0;
        	for (int i = 0; i < moves.length; i += 2) {
@@ -259,8 +280,15 @@ public class PgnReader {
 		moves[i + 1] = tempMove.split(" ")[1];
 	    } else {
 		moves[i] = tempMove;
-		moves[i + 1] = " ";
+	    }	    
+	}
+	tempMoves = new String[moves.length - 1];
+	if (moves[moves.length - 1] == null) {
+	    for (int a = 0; a < tempMoves.length; a++) {
+		tempMoves[a] = moves[a];
 	    }
+	    moves = new String[tempMoves.length];
+	    moves = tempMoves;
 	}
 	//each cell of moves is now filled with a single move and is
 	//ordered sequentially
@@ -281,6 +309,7 @@ public class PgnReader {
         } else {
             canMove = ((r - mr) * multiplier == 2) ? true : canMove;
 	    canMove = ((r - mr) * multiplier == 1) ? true : canMove;
+	    canMove = (c == mc) ? canMove : false;
         }
         return canMove;
     }

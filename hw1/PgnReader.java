@@ -52,11 +52,14 @@ public class PgnReader {
         String finalInFEN = "";
         int spaceCounter = 0;
         for (int i = 0; i < moves.length; i++) {
-            piece = decidePiece(moves[i], i);
-            coordsOfMove = moveCoords(moves[i]);
-            coordinatesOfPieces = findPieces(piece);
-            coordinatesOfPiece = choosePiece(piece, coordinatesOfPieces,
-                                             coordsOfMove, moves[i], i);
+	    if (isSpecialMove(moves[i])) {
+		doSpecialMove(moves[i], i);
+	    } else {
+		piece = decidePiece(moves[i], i);
+		coordsOfMove = moveCoords(moves[i]);
+		coordinatesOfPieces = findPieces(piece);
+		coordinatesOfPiece = choosePiece(piece, coordinatesOfPieces,
+						 coordsOfMove, moves[i], i);
             //Debug Code
             /*System.out.println(moves[i]);
             System.out.println(coordsOfMove[0] + ", " + coordsOfMove[1] +
@@ -68,9 +71,9 @@ public class PgnReader {
             System.out.println(coordinatesOfPiece[0] + " " +
             coordinatesOfPiece[1]);*/
             //Debug End
-            board[coordsOfMove[0]][coordsOfMove[1]] = piece;
-            board[coordinatesOfPiece[0]][coordinatesOfPiece[1]] = ' ';
-            finalInFEN = "";
+		board[coordsOfMove[0]][coordsOfMove[1]] = piece;
+		board[coordinatesOfPiece[0]][coordinatesOfPiece[1]] = ' ';
+		finalInFEN = "";
             //Debug Code pt2
             /*
             for (char[] k : board) {
@@ -90,6 +93,14 @@ public class PgnReader {
                 spaceCounter = 0;
             }
             System.out.println(finalInFEN);*/
+	    }
+	    for (char[] a : board) {
+		System.out.println();
+		for(char b : a) {
+		    System.out.print(b + " ");
+		}
+	    }
+	    System.out.println("\n----------------");
         }
         finalInFEN = "";
         for (char[] i : board) {
@@ -110,6 +121,68 @@ public class PgnReader {
         }
         finalInFEN = finalInFEN.substring(0, (finalInFEN.length() - 1));
         return finalInFEN;
+    }
+    /**
+     *Decide if the move is a special case
+     */
+    public static boolean isSpecialMove(String move) {
+	if (move.equals("O-O-O")) {
+	    return true;
+	}
+	if (move.length() >= 4) {
+	    if (move.charAt(1) == 'x') {
+		return false;
+	    }
+	    if (move.charAt(1) > 96 && move.charAt(1) < 105) {
+		return true;
+	    }
+	}
+	return false;
+    }
+    /**
+     *Handle special moves
+     */
+    public static void doSpecialMove(String move, int turn) {
+	char piece = ' ';
+	if (move.equals("O-O-O")) {
+	    if ( turn % 2 == 0) {
+		board[7][2] = 'K';
+		board[7][3] = 'R';
+		board[7][0] = ' ';
+		board[7][4] = ' ';
+	    } else {
+		board[0][2] = 'k';
+		board[0][3] = 'r';
+		board[0][0] = ' ';
+		board[0][4] = ' ';
+	    }
+	} else if (move.equals("O-O")) {
+	    	    if ( turn % 2 == 0) {
+		board[7][6] = 'K';
+		board[7][5] = 'R';
+		board[7][7] = ' ';
+		board[7][4] = ' ';
+	    } else {
+		board[0][6] = 'k';
+		board[0][5] = 'r';
+		board[0][7] = ' ';
+		board[0][4] = ' ';
+	    }
+	} else if (move.length() >= 4)/*Handle rank ambiguities*/ {
+	    if (move.charAt(1) > 96 && move.charAt(0) < 105) {
+		piece = decidePiece(move, turn);
+		int[] coordsOfMove = moveCoords(move);
+		int[][] coordsOfPieces = findPieces(piece);
+		char rank = move.charAt(1);
+		rank -= 97;
+		for (int i = 0; i < coordsOfPieces.length; i++) {
+		    if (coordsOfPieces[i][1] == rank) {
+			board[coordsOfMove[0]][coordsOfMove[1]] = piece;
+			board[i][rank] = ' ';
+		    }
+		}
+	    }
+	}
     }
     /**
      *Find the coordinates of the one piece that
@@ -222,6 +295,9 @@ public class PgnReader {
             return ' ';
             }*/
         char pulledPiece = move.charAt(0);
+	if (move.length() > 3 && pulledPiece > 96 && pulledPiece < 105) {
+	    pulledPiece = move.charAt(1);
+	}
         char piece;
         if (pulledPiece == 'N') {
             if (turn % 2 == 0) {
@@ -280,7 +356,7 @@ public class PgnReader {
         listOfMoves = listOfMoves.trim();
         //listOfMoves now contains only the numbered list of moves
         endIndex = listOfMoves.lastIndexOf('.');
-        startIndex = endIndex - 1;
+        startIndex = endIndex - 2;
         numOfMoves = Integer.parseInt(listOfMoves.substring(startIndex,
                                                             endIndex));
         //numOfMoves reads the number of the last move in the file;

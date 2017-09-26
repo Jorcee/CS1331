@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
 public class PgnReader {
     private static char[][] board = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
                                      {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
@@ -52,6 +53,8 @@ public class PgnReader {
         String finalInFEN = "";
         int spaceCounter = 0;
         for (int i = 0; i < moves.length; i++) {
+	    //Debug 3
+	    System.out.println("Move: " + moves[i]);
 	    if (isSpecialMove(moves[i])) {
 		doSpecialMove(moves[i], i);
 	    } else {
@@ -60,8 +63,8 @@ public class PgnReader {
 		coordinatesOfPieces = findPieces(piece);
 		coordinatesOfPiece = choosePiece(piece, coordinatesOfPieces,
 						 coordsOfMove, moves[i], i);
-            //Debug Code
-            /*System.out.println(moves[i]);
+	    //Debug Code
+            System.out.println(moves[i]);
             System.out.println(coordsOfMove[0] + ", " + coordsOfMove[1] +
             " Move");
             for (int j[] : coordinatesOfPieces) {
@@ -69,7 +72,7 @@ public class PgnReader {
             }
             System.out.println(piece);
             System.out.println(coordinatesOfPiece[0] + " " +
-            coordinatesOfPiece[1]);*/
+            coordinatesOfPiece[1]);
             //Debug End
 		board[coordsOfMove[0]][coordsOfMove[1]] = piece;
 		board[coordinatesOfPiece[0]][coordinatesOfPiece[1]] = ' ';
@@ -128,6 +131,9 @@ public class PgnReader {
     public static boolean isSpecialMove(String move) {
 	if (move.equals("O-O-O")) {
 	    return true;
+	}
+	if (move.contains("#") || move.contains("+")) {
+	    return false;
 	}
 	if (move.length() >= 4) {
 	    if (move.charAt(1) == 'x') {
@@ -349,6 +355,7 @@ public class PgnReader {
         int endIndex = 0;
         int numOfMoves;
         String tempMove;
+	game = game.replace("\n"," ");
         startIndex = game.lastIndexOf(']');
         startIndex++;
         endIndex = game.length();
@@ -358,7 +365,7 @@ public class PgnReader {
         endIndex = listOfMoves.lastIndexOf('.');
         startIndex = endIndex - 2;
         numOfMoves = Integer.parseInt(listOfMoves.substring(startIndex,
-                                                            endIndex));
+                                                            endIndex).trim());
         //numOfMoves reads the number of the last move in the file;
         //How many move sets there are
         String[] moves = new String[numOfMoves * 2];
@@ -461,8 +468,48 @@ public class PgnReader {
      */
     public static boolean canRookMove(int r, int c, int mr, int mc) {
         boolean canMove = false;
-        canMove = (r == mr) ? true : canMove;
-        canMove = (c == mc) ? true : canMove;
+        char[] rowArray;
+	char[] colArray;
+	if (r == mr) {
+	    if(Math.abs(c - mc) == 1) {
+		return true;
+	    }
+	    if (c > mc) {
+		colArray = Arrays.copyOfRange(board[r], mc + 1, c);
+	    } else {
+		colArray = Arrays.copyOfRange(board[r], c + 1, mc);
+	    }
+	    canMove = true;
+	    for (char i : colArray) {
+		if (i != ' ') {
+		    canMove = false;
+		}
+	    }
+	}
+	if (c == mc) {
+	    if(Math.abs(r - mr) == 1) {
+		return true;
+	    }
+	    if (r > mr) {
+		rowArray = new char[r - mr - 1];
+		int counter = 0;
+		for(int i = mr + 1; i < r; i++) {
+		    rowArray[counter++] = board[i][c];
+		}
+	    } else {
+		rowArray = new char[mr - r - 1];
+		int counter = 0;
+		for(int i = r + 1; i < mr; i++) {
+		    rowArray[counter++] = board[i][c];
+		}
+	    }
+	    canMove = true;
+	    for (char i : rowArray) {
+		if (i != ' ') {
+		    canMove = false;
+		}
+	    }
+	}
         return canMove;
     }
 

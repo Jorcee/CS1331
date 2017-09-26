@@ -132,6 +132,9 @@ public class PgnReader {
         if (move.equals("O-O-O")) {
             return true;
         }
+        if (move.contains("=")) {
+            return true;
+        }
         if (move.contains("#") || move.contains("+")) {
             return false;
         }
@@ -161,6 +164,26 @@ public class PgnReader {
                 board[0][3] = 'r';
                 board[0][0] = ' ';
                 board[0][4] = ' ';
+            }
+        } else if (move.contains("=")) {
+            int[] coordsOfMove;
+            int[][] coordsOfPieces;
+            int[] coordsOfPiece;
+            int endIndex = move.indexOf("=");
+            char newPiece = move.charAt(endIndex + 1);
+            newPiece = (turn % 2 == 0) ? newPiece
+                : Character.toLowerCase(newPiece);
+            move = move.substring(0, endIndex);
+            if (isSpecialMove(move)) {
+                doSpecialMove(move, turn);
+            } else {
+                piece = decidePiece(move, turn);
+                coordsOfMove = moveCoords(move);
+                coordsOfPieces = findPieces(piece);
+                coordsOfPiece = choosePiece(piece, coordsOfPieces,
+                                                 coordsOfMove, move, turn);
+                board[coordsOfMove[0]][coordsOfMove[1]] = newPiece;
+                board[coordsOfPiece[0]][coordsOfPiece[1]] = ' ';
             }
         } else if (move.equals("O-O")) {
             if (turn % 2 == 0) {

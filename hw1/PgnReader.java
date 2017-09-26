@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
 public class PgnReader {
     private static char[][] board = {{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
                                      {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
@@ -53,18 +53,18 @@ public class PgnReader {
         String finalInFEN = "";
         int spaceCounter = 0;
         for (int i = 0; i < moves.length; i++) {
-	    //Debug 3
-	    System.out.println("Move: " + moves[i]);
-	    if (isSpecialMove(moves[i])) {
-		doSpecialMove(moves[i], i);
-	    } else {
-		piece = decidePiece(moves[i], i);
-		coordsOfMove = moveCoords(moves[i]);
-		coordinatesOfPieces = findPieces(piece);
-		coordinatesOfPiece = choosePiece(piece, coordinatesOfPieces,
-						 coordsOfMove, moves[i], i);
-	    //Debug Code
-            System.out.println(moves[i]);
+            //Debug 3
+            System.out.println("Move: " + moves[i]);
+            if (isSpecialMove(moves[i])) {
+                doSpecialMove(moves[i], i);
+            } else {
+                piece = decidePiece(moves[i], i);
+                coordsOfMove = moveCoords(moves[i]);
+                coordinatesOfPieces = findPieces(piece);
+                coordinatesOfPiece = choosePiece(piece, coordinatesOfPieces,
+                                                 coordsOfMove, moves[i], i);
+            //Debug Code
+            /*System.out.println(moves[i]);
             System.out.println(coordsOfMove[0] + ", " + coordsOfMove[1] +
             " Move");
             for (int j[] : coordinatesOfPieces) {
@@ -72,11 +72,11 @@ public class PgnReader {
             }
             System.out.println(piece);
             System.out.println(coordinatesOfPiece[0] + " " +
-            coordinatesOfPiece[1]);
+            coordinatesOfPiece[1]);*/
             //Debug End
-		board[coordsOfMove[0]][coordsOfMove[1]] = piece;
-		board[coordinatesOfPiece[0]][coordinatesOfPiece[1]] = ' ';
-		finalInFEN = "";
+                board[coordsOfMove[0]][coordsOfMove[1]] = piece;
+                board[coordinatesOfPiece[0]][coordinatesOfPiece[1]] = ' ';
+                finalInFEN = "";
             //Debug Code pt2
             /*
             for (char[] k : board) {
@@ -96,14 +96,14 @@ public class PgnReader {
                 spaceCounter = 0;
             }
             System.out.println(finalInFEN);*/
-	    }
-	    for (char[] a : board) {
-		System.out.println();
-		for(char b : a) {
-		    System.out.print(b + " ");
-		}
-	    }
-	    System.out.println("\n----------------");
+            }
+            for (char[] a : board) {
+                System.out.println();
+                for (char b : a) {
+                    System.out.print(b + " ");
+                }
+            }
+            System.out.println("\n----------------");
         }
         finalInFEN = "";
         for (char[] i : board) {
@@ -129,66 +129,78 @@ public class PgnReader {
      *Decide if the move is a special case
      */
     public static boolean isSpecialMove(String move) {
-	if (move.equals("O-O-O")) {
-	    return true;
-	}
-	if (move.contains("#") || move.contains("+")) {
-	    return false;
-	}
-	if (move.length() >= 4) {
-	    if (move.charAt(1) == 'x') {
-		return false;
-	    }
-	    if (move.charAt(1) > 96 && move.charAt(1) < 105) {
-		return true;
-	    }
-	}
-	return false;
+        if (move.equals("O-O-O")) {
+            return true;
+        }
+        if (move.contains("#") || move.contains("+")) {
+            return false;
+        }
+        if (move.length() >= 4) {
+            if (move.charAt(1) == 'x') {
+                return false;
+            }
+            if (move.charAt(1) > 96 && move.charAt(1) < 105) {
+                return true;
+            }
+        }
+        return false;
     }
     /**
      *Handle special moves
      */
     public static void doSpecialMove(String move, int turn) {
-	char piece = ' ';
-	if (move.equals("O-O-O")) {
-	    if ( turn % 2 == 0) {
-		board[7][2] = 'K';
-		board[7][3] = 'R';
-		board[7][0] = ' ';
-		board[7][4] = ' ';
-	    } else {
-		board[0][2] = 'k';
-		board[0][3] = 'r';
-		board[0][0] = ' ';
-		board[0][4] = ' ';
-	    }
-	} else if (move.equals("O-O")) {
-	    	    if ( turn % 2 == 0) {
-		board[7][6] = 'K';
-		board[7][5] = 'R';
-		board[7][7] = ' ';
-		board[7][4] = ' ';
-	    } else {
-		board[0][6] = 'k';
-		board[0][5] = 'r';
-		board[0][7] = ' ';
-		board[0][4] = ' ';
-	    }
-	} else if (move.length() >= 4)/*Handle rank ambiguities*/ {
-	    if (move.charAt(1) > 96 && move.charAt(0) < 105) {
-		piece = decidePiece(move, turn);
-		int[] coordsOfMove = moveCoords(move);
-		int[][] coordsOfPieces = findPieces(piece);
-		char rank = move.charAt(1);
-		rank -= 97;
-		for (int i = 0; i < coordsOfPieces.length; i++) {
-		    if (coordsOfPieces[i][1] == rank) {
-			board[coordsOfMove[0]][coordsOfMove[1]] = piece;
-			board[i][rank] = ' ';
-		    }
-		}
-	    }
-	}
+        char piece = ' ';
+        if (move.equals("O-O-O")) {
+            if (turn % 2 == 0) {
+                board[7][2] = 'K';
+                board[7][3] = 'R';
+                board[7][0] = ' ';
+                board[7][4] = ' ';
+            } else {
+                board[0][2] = 'k';
+                board[0][3] = 'r';
+                board[0][0] = ' ';
+                board[0][4] = ' ';
+            }
+        } else if (move.equals("O-O")) {
+            if (turn % 2 == 0) {
+                board[7][6] = 'K';
+                board[7][5] = 'R';
+                board[7][7] = ' ';
+                board[7][4] = ' ';
+            } else {
+                board[0][6] = 'k';
+                board[0][5] = 'r';
+                board[0][7] = ' ';
+                board[0][4] = ' ';
+            }
+        } else if (move.length() >= 4)/*Handle rank ambiguities*/ {
+            if (move.charAt(1) > 96 && move.charAt(0) < 105) {
+                piece = decidePiece(move, turn);
+                int[] coordsOfMove = moveCoords(move);
+                int[][] coordsOfPieces = findPieces(piece);
+                char rank = move.charAt(1);
+                rank -= 97;
+                for (int i = 0; i < coordsOfPieces.length; i++) {
+                    if (coordsOfPieces[i][1] == rank) {
+                        board[coordsOfMove[0]][coordsOfMove[1]] = piece;
+                        board[i][rank] = ' ';
+                    }
+                }
+            } else {
+                piece = decidePiece(move, turn);
+                int[] coordsOfMove = moveCoords(move);
+                int[][] coordsOfPieces = findPieces(piece);
+                char file = move.charAt(1);
+                file -= 49;
+                for (int i = 0; i < coordsOfPieces.length; i++) {
+                    if (coordsOfPieces[i][0] == file) {
+                        board[coordsOfMove[0]][coordsOfMove[1]] = piece;
+                        board[coordsOfPieces[i][0]][coordsOfPieces[i][1]] = ' ';
+                    }
+                }
+            }
+        }
     }
     /**
      *Find the coordinates of the one piece that
@@ -301,9 +313,9 @@ public class PgnReader {
             return ' ';
             }*/
         char pulledPiece = move.charAt(0);
-	if (move.length() > 3 && pulledPiece > 96 && pulledPiece < 105) {
-	    pulledPiece = move.charAt(1);
-	}
+        if (move.length() > 3 && pulledPiece > 96 && pulledPiece < 105) {
+            pulledPiece = move.charAt(1);
+        }
         char piece;
         if (pulledPiece == 'N') {
             if (turn % 2 == 0) {
@@ -355,7 +367,7 @@ public class PgnReader {
         int endIndex = 0;
         int numOfMoves;
         String tempMove;
-	game = game.replace("\n"," ");
+        game = game.replace("\n", " ");
         startIndex = game.lastIndexOf(']');
         startIndex++;
         endIndex = game.length();
@@ -469,47 +481,47 @@ public class PgnReader {
     public static boolean canRookMove(int r, int c, int mr, int mc) {
         boolean canMove = false;
         char[] rowArray;
-	char[] colArray;
-	if (r == mr) {
-	    if(Math.abs(c - mc) == 1) {
-		return true;
-	    }
-	    if (c > mc) {
-		colArray = Arrays.copyOfRange(board[r], mc + 1, c);
-	    } else {
-		colArray = Arrays.copyOfRange(board[r], c + 1, mc);
-	    }
-	    canMove = true;
-	    for (char i : colArray) {
-		if (i != ' ') {
-		    canMove = false;
-		}
-	    }
-	}
-	if (c == mc) {
-	    if(Math.abs(r - mr) == 1) {
-		return true;
-	    }
-	    if (r > mr) {
-		rowArray = new char[r - mr - 1];
-		int counter = 0;
-		for(int i = mr + 1; i < r; i++) {
-		    rowArray[counter++] = board[i][c];
-		}
-	    } else {
-		rowArray = new char[mr - r - 1];
-		int counter = 0;
-		for(int i = r + 1; i < mr; i++) {
-		    rowArray[counter++] = board[i][c];
-		}
-	    }
-	    canMove = true;
-	    for (char i : rowArray) {
-		if (i != ' ') {
-		    canMove = false;
-		}
-	    }
-	}
+        char[] colArray;
+        if (r == mr) {
+            if (Math.abs(c - mc) == 1) {
+                return true;
+            }
+            if (c > mc) {
+                colArray = Arrays.copyOfRange(board[r], mc + 1, c);
+            } else {
+                colArray = Arrays.copyOfRange(board[r], c + 1, mc);
+            }
+            canMove = true;
+            for (char i : colArray) {
+                if (i != ' ') {
+                    canMove = false;
+                }
+            }
+        }
+        if (c == mc) {
+            if (Math.abs(r - mr) == 1) {
+                return true;
+            }
+            if (r > mr) {
+                rowArray = new char[r - mr - 1];
+                int counter = 0;
+                for (int i = mr + 1; i < r; i++) {
+                    rowArray[counter++] = board[i][c];
+                }
+            } else {
+                rowArray = new char[mr - r - 1];
+                int counter = 0;
+                for (int i = r + 1; i < mr; i++) {
+                    rowArray[counter++] = board[i][c];
+                }
+            }
+            canMove = true;
+            for (char i : rowArray) {
+                if (i != ' ') {
+                    canMove = false;
+                }
+            }
+        }
         return canMove;
     }
 

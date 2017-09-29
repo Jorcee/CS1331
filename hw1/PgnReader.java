@@ -54,7 +54,7 @@ public class PgnReader {
         int spaceCounter = 0;
         for (int i = 0; i < moves.length; i++) {
             //Debug 3
-            System.out.println("Move: " + moves[i]);
+            //System.out.println("Move: " + moves[i]);
             if (isSpecialMove(moves[i])) {
                 doSpecialMove(moves[i], i);
             } else {
@@ -97,13 +97,15 @@ public class PgnReader {
             }
             System.out.println(finalInFEN);*/
             }
-            for (char[] a : board) {
+            //Debug 4
+            /*for (char[] a : board) {
                 System.out.println();
                 for (char b : a) {
                     System.out.print(b + " ");
                 }
             }
-            System.out.println("\n----------------");
+            System.out.println("\n----------------");*/
+            //Debug End
         }
         finalInFEN = "";
         for (char[] i : board) {
@@ -129,11 +131,15 @@ public class PgnReader {
      *Decide if the move is a special case
      */
     public static boolean isSpecialMove(String move) {
-        if (move.equals("O-O-O")) {
+        if (move.contains("O-O")) {
             return true;
         }
         if (move.contains("=")) {
             return true;
+        }
+        if (move.contains("?")) {
+            int sInd = move.indexOf("?");
+            move = move.substring(0, sInd);
         }
         if (move.contains("#") || move.contains("+")) {
             return false;
@@ -163,6 +169,18 @@ public class PgnReader {
                 board[0][2] = 'k';
                 board[0][3] = 'r';
                 board[0][0] = ' ';
+                board[0][4] = ' ';
+            }
+        } else if (move.equals("O-O")) {
+            if (turn % 2 == 0) {
+                board[7][6] = 'K';
+                board[7][5] = 'R';
+                board[7][7] = ' ';
+                board[7][4] = ' ';
+            } else {
+                board[0][6] = 'k';
+                board[0][5] = 'r';
+                board[0][7] = ' ';
                 board[0][4] = ' ';
             }
         } else if (move.contains("=")) {
@@ -449,6 +467,13 @@ public class PgnReader {
             canMove = ((r - mr) * multiplier == 2) ? true : canMove;
             canMove = ((r - mr) * multiplier == 1) ? true : canMove;
             canMove = (c == mc) ? canMove : false;
+        }
+        if (board[mr][mc] == ' ' && canMove) {
+            if (t % 2 == 0) {
+                board[mr + 1][mc] = ' ';
+            } else {
+                board[mr - 1][mc] = ' ';
+            }
         }
         return canMove;
     }

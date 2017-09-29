@@ -148,7 +148,7 @@ public class PgnReader {
             if (move.charAt(1) == 'x') {
                 return false;
             }
-            if (move.charAt(1) > 96 && move.charAt(1) < 105) {
+            if (move.charAt(1) >= 'a' && move.charAt(1) <= 'h') {
                 return true;
             }
         }
@@ -216,16 +216,16 @@ public class PgnReader {
                 board[0][4] = ' ';
             }
         } else if (move.length() >= 4)/*Handle rank ambiguities*/ {
-            if (move.charAt(1) > 96 && move.charAt(0) < 105) {
+            if (move.charAt(1) >= 'a'  && move.charAt(0) <= 'h') {
                 piece = decidePiece(move, turn);
                 int[] coordsOfMove = moveCoords(move);
                 int[][] coordsOfPieces = findPieces(piece);
                 char rank = move.charAt(1);
-                rank -= 97;
+                rank -= 'a';
                 for (int i = 0; i < coordsOfPieces.length; i++) {
                     if (coordsOfPieces[i][1] == rank) {
                         board[coordsOfMove[0]][coordsOfMove[1]] = piece;
-                        board[i][rank] = ' ';
+                        board[coordsOfPieces[i][0]][rank] = ' ';
                     }
                 }
             } else {
@@ -233,7 +233,7 @@ public class PgnReader {
                 int[] coordsOfMove = moveCoords(move);
                 int[][] coordsOfPieces = findPieces(piece);
                 char file = move.charAt(1);
-                file -= 49;
+                file -= '1';
                 for (int i = 0; i < coordsOfPieces.length; i++) {
                     if (coordsOfPieces[i][0] == file) {
                         board[coordsOfMove[0]][coordsOfMove[1]] = piece;
@@ -463,17 +463,17 @@ public class PgnReader {
         if (a) {
             canMove = ((r - mr) * multiplier == 1) ? true : canMove;
             canMove = (Math.abs(c - mc) == 1) ? canMove : false;
+	    if (board[mr][mc] == ' ' && canMove) {
+		if (t % 2 == 0) {
+		    board[mr + 1][mc] = ' ';
+		} else {
+		    board[mr - 1][mc] = ' ';
+		}
+	    }
         } else {
             canMove = ((r - mr) * multiplier == 2) ? true : canMove;
             canMove = ((r - mr) * multiplier == 1) ? true : canMove;
             canMove = (c == mc) ? canMove : false;
-        }
-        if (board[mr][mc] == ' ' && canMove) {
-            if (t % 2 == 0) {
-                board[mr + 1][mc] = ' ';
-            } else {
-                board[mr - 1][mc] = ' ';
-            }
         }
         return canMove;
     }

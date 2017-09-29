@@ -152,6 +152,11 @@ public class PgnReader {
                 return true;
             }
         }
+        if (move.charAt(0) == '0' || move.charAt(0) == '1') {
+            if (move.contains("-")) {
+                return true;
+            }
+        }
         return false;
     }
     /**

@@ -463,13 +463,13 @@ public class PgnReader {
         if (a) {
             canMove = ((r - mr) * multiplier == 1) ? true : canMove;
             canMove = (Math.abs(c - mc) == 1) ? canMove : false;
-	    if (board[mr][mc] == ' ' && canMove) {
-		if (t % 2 == 0) {
-		    board[mr + 1][mc] = ' ';
-		} else {
-		    board[mr - 1][mc] = ' ';
-		}
-	    }
+            if (board[mr][mc] == ' ' && canMove) {
+                if (t % 2 == 0) {
+                    board[mr + 1][mc] = ' ';
+                } else {
+                    board[mr - 1][mc] = ' ';
+                }
+            }
         } else {
             canMove = ((r - mr) * multiplier == 2) ? true : canMove;
             canMove = ((r - mr) * multiplier == 1) ? true : canMove;
